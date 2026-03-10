@@ -1,0 +1,28 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Run AutoHeal AI Desktop",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/aship_desktop.py",
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "Run Demo Website (Flask)",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/demo_app/app.py",
+            "console": "integratedTerminal"
+        }
+    ],
+    "compounds": [
+        {
+            "name": "Run Both Website & AutoHeal AI",
+            "configurations": [
+                "Run AutoHeal AI Desktop",
+                "Run Demo Website (Flask)"
+            ]
+        }
+    ]
+}
