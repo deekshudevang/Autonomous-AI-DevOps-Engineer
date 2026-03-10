@@ -1,0 +1,13 @@
+apiVersion: chaos-mesh.org/v1alpha1
+kind: PodChaos
+metadata:
+  name: api-pod-kill
+  namespace: aship-system
+spec:
+  action: pod-kill
+  mode: one
+  selector:
+    labelSelectors:
+      "app": "billing-api"
+  scheduler:
+    cron: "@every 2m"

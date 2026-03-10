@@ -1,0 +1,12 @@
+fastapi==0.103.2
+uvicorn==0.23.2
+pydantic==2.4.2
+langgraph
+langchain
+opentelemetry-api
+opentelemetry-sdk
+opentelemetry-exporter-jaeger
+requests
+pytest
+locust
+streamlit

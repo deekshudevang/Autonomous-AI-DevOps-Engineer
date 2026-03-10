@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task Manager - AutoHeal Demo</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #0f1115; color: #f8fafc; font-family: 'Inter', sans-serif; }
+        .card { background-color: #181a20; border: 1px solid #222630; border-radius: 8px; padding: 20px; }
+    </style>
+</head>
+<body class="p-8">
+
+    <div class="max-w-6xl mx-auto">
+        <header class="mb-8 border-b border-gray-800 pb-4">
+            <h1 class="text-3xl font-bold text-blue-400">Task Management Dashboard</h1>
+            <p class="text-gray-400 text-sm mt-2">This demo software intentionally generates real-world production errors so our AI DevOps system can detect, analyze, and fix them automatically.</p>
+        </header>
+
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div class="card text-center">
+                <h3 class="text-gray-400 text-sm">Server Health</h3>
+                <p id="health-metric" class="text-2xl font-bold text-green-400 mt-2">Healthy</p>
+            </div>
+            <div class="card text-center">
+                <h3 class="text-gray-400 text-sm">API Status</h3>
+                <p id="api-status" class="text-2xl font-bold text-blue-400 mt-2">Online</p>
+            </div>
+            <div class="card text-center">
+                <h3 class="text-gray-400 text-sm">Error Count</h3>
+                <p id="error-count" class="text-2xl font-bold text-red-400 mt-2">0</p>
+            </div>
+            <div class="card text-center">
+                <h3 class="text-gray-400 text-sm">CPU / Memory Usage</h3>
+                <p id="metrics-data" class="text-lg font-bold text-yellow-500 mt-2">--% / --%</p>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            
+            <!-- Tasks Area -->
+            <div class="md:col-span-2 card">
+                <h2 class="text-xl font-bold mb-4">Task List</h2>
+                
+                <div class="flex gap-2 mb-4">
+                    <input type="text" id="task-title" class="flex-1 bg-gray-800 border-none rounded px-4 py-2 text-white" placeholder="Enter new task...">
+                    <button onclick="createTask()" class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded font-bold">Add</button>
+                </div>
+                
+                <ul id="task-list" class="space-y-2">
+                    <!-- Tasks injected here -->
+                </ul>
+            </div>
+
+            <!-- Fault Injection Area -->
+            <div class="card border-red-900 border-2">
+                <h2 class="text-xl font-bold text-red-500 mb-4">Test Bug Generation</h2>
+                <div class="space-y-3">
+                    <button onclick="triggerCrash()" class="w-full bg-red-900 hover:bg-red-800 text-white rounded py-2">Trigger App Crash</button>
+                    <button onclick="triggerSlow()" class="w-full bg-yellow-700 hover:bg-yellow-600 text-white rounded py-2">Trigger Slow API (Timeout)</button>
+                    <button onclick="triggerMemoryLeak()" class="w-full bg-purple-900 hover:bg-purple-800 text-white rounded py-2">Trigger Memory Leak</button>
+                    <button onclick="triggerLogicError()" class="w-full bg-orange-800 hover:bg-orange-700 text-white rounded py-2">Trigger Logic Error (Stats)</button>
+                </div>
+                
+                <div class="mt-6 pt-6 border-t border-gray-800">
+                    <h3 class="text-sm font-bold mb-2 text-gray-400">Live API Response Feed</h3>
+                    <pre id="api-feed" class="text-xs text-red-300 h-32 overflow-y-auto bg-black p-2 rounded">Waiting...</pre>
+                </div>
+            </div>
+            <!-- AutoHeal AI Area -->
+            <div class="card border-blue-900 border-2 mt-8 md:col-span-3 lg:col-span-3">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-xl font-bold text-blue-500">AutoHeal AI Agent (Live)</h2>
+                    <div class="space-x-2">
+                        <button onclick="haltAI()" class="bg-red-600 hover:bg-red-500 text-white rounded px-3 py-1 text-sm font-bold">Stop AI Ops</button>
+                        <button onclick="resumeAI()" class="bg-green-600 hover:bg-green-500 text-white rounded px-3 py-1 text-sm font-bold">Resume AI</button>
+                    </div>
+                </div>
+                <div id="ai-status-display" class="bg-black p-4 rounded min-h-[100px] text-sm font-mono overflow-y-auto max-h-64">
+                    <div class="text-green-500 font-bold">System Healthy - AI Observing Passive</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let errCount = 0;
+
+        async function haltAI() {
+            try {
+                await fetch('http://localhost:8000/v1/escalations/halt', { method: 'POST' });
+                document.getElementById('ai-status-display').innerHTML = '<div class="text-red-500 font-bold">SYSTEM HALTED BY USER - AI execution blocked.</div>';
+            } catch (e) {
+                console.error(e);
+            }
+        }
+        
+        async function resumeAI() {
+            try {
+                await fetch('http://localhost:8000/v1/escalations/resume', { method: 'POST' });
+                document.getElementById('ai-status-display').innerHTML = '<div class="text-green-500 font-bold">System Healthy - AI Observing Passive</div>';
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        function logFeed(msg) {
+            const feed = document.getElementById('api-feed');
+            feed.innerText = msg + '\n' + feed.innerText;
+        }
+
+        async function fetchMetrics() {
+            try {
+                const res = await fetch('/metrics');
+                if(!res.ok) throw new Error("Metrics Endpoint Failed");
+                const data = await res.json();
+                document.getElementById('metrics-data').innerText = `${data.cpu_usage_percent}% / ${data.memory_usage_percent}%`;
+            } catch (e) {
+                document.getElementById('metrics-data').innerText = "Offline";
+                document.getElementById('health-metric').innerText = "Unresponsive";
+                document.getElementById('health-metric').className = "text-2xl font-bold text-red-500 mt-2";
+            }
+        }
+
+        async function fetchTasks() {
+            try {
+                const res = await fetch('/tasks');
+                if(!res.ok) throw new Error("Database Connection Error");
+                const tasks = await res.json();
+                
+                if (tasks.error) {
+                    throw new Error(tasks.error);
+                }
+                
+                const list = document.getElementById('task-list');
+                list.innerHTML = '';
+                tasks.forEach(t => {
+                    list.innerHTML += `<li class="p-3 bg-gray-800 rounded flex justify-between items-center">
+                        <span>${t.title} <span class="text-xs text-gray-500">[${t.status}]</span></span>
+                        <button onclick="deleteTask(${t.id})" class="text-red-400 hover:text-red-300 text-sm">Delete</button>
+                    </li>`;
+                });
+                document.getElementById('api-status').innerText = "Online";
+                document.getElementById('api-status').className = "text-2xl font-bold text-blue-400 mt-2";
+            } catch (e) {
+                errCount++;
+                document.getElementById('error-count').innerText = errCount;
+                logFeed("ERROR: " + e.message);
+                document.getElementById('api-status').innerText = "DB Failure";
+                document.getElementById('api-status').className = "text-2xl font-bold text-red-400 mt-2";
+            }
+        }
+
+        async function createTask() {
+            const title = document.getElementById('task-title').value;
+            if(!title) return;
+            try {
+                // Warning: The Python backend has an intentional memory leak here!
+                const res = await fetch('/tasks', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({title})
+                });
+                fetchTasks();
+                document.getElementById('task-title').value = '';
+            } catch (e) { logFeed(e.message); }
+        }
+
+        async function deleteTask(id) {
+            await fetch(`/tasks/${id}`, {method: 'DELETE'});
+            fetchTasks();
+        }
+
+        // --- Bug Triggers ---
+        async function triggerCrash() {
+            logFeed("Triggering Fatal Crash...");
+            try { await fetch('/api/crash'); } catch(e) {}
+            errCount++;
+            document.getElementById('error-count').innerText = errCount;
+        }
+
+        async function triggerSlow() {
+            logFeed("Triggering Slow API (Timeout expected after 6s)...");
+            document.getElementById('api-status').innerText = "Latency Spiking...";
+            document.getElementById('api-status').className = "text-2xl font-bold text-yellow-500 mt-2";
+            try { 
+                const res = await fetch('/api/slow'); 
+                const data = await res.json();
+                logFeed("Slow Response received: " + data.message);
+            } catch(e) {}
+        }
+
+        async function triggerMemoryLeak() {
+            logFeed("Flooding memory heap...");
+            for(let i=0; i<50; i++) {
+                fetch('/tasks', {method: 'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({title:"Leak-" + i})});
+            }
+        }
+
+        async function triggerLogicError() {
+            logFeed("Fetching system stats...");
+            try {
+                const res = await fetch('/api/stats');
+                const data = await res.json();
+                logFeed(`Stats: Total=${data.total}, Completed=${data.completed}, Percentage=${data.percentage}%`);
+                if(data.percentage > 100 || data.percentage < 0) {
+                    logFeed("🔥 Logic Error Detected: Invalid percentage value.");
+                    errCount++;
+                    document.getElementById('error-count').innerText = errCount;
+                }
+            } catch(e) {}
+        }
+
+        async function pollAI() {
+            try {
+                const res = await fetch('http://localhost:8000/v1/active_incident');
+                if(!res.ok) return;
+                const data = await res.json();
+                if (data.incident_id) {
+                    const res2 = await fetch(`http://localhost:8000/v1/incidents/${data.incident_id}`);
+                    const statusData = await res2.json();
+                    
+                    const pStatus = (statusData.status || "").toLowerCase();
+                    const steps = [
+                        { label: 'Autonomous Bug Detection', activePaths: ['analyzing', 'validating', 'sandboxing', 'resolved'] },
+                        { label: 'Intelligent Fix Suggestion', activePaths: ['validating', 'sandboxing', 'resolved'] },
+                        { label: 'Sandbox Testing', activePaths: ['sandboxing', 'resolved'] },
+                        { label: 'Self Healing Deployment', activePaths: ['resolved'] }
+                    ];
+
+                    let html = '<div class="flex flex-col md:flex-row gap-2 mb-4">';
+                    steps.forEach(s => {
+                        let isActive = s.activePaths.includes(pStatus);
+                        let colorClass = isActive ? (pStatus==='resolved' ? 'bg-green-700 text-white border-green-500 shadow-[0_0_10px_rgba(34,197,94,0.5)]' : 'bg-blue-800 text-white border-blue-500 animate-pulse outline outline-2 outline-blue-400') : 'bg-gray-900 border-gray-800 text-gray-500';
+                        if (pStatus === 'halted') colorClass = 'bg-red-900 border-red-700 text-gray-300';
+                        html += `<div class="flex-1 border-2 ${colorClass} p-2 rounded text-center text-xs font-bold transition-all duration-300">${s.label}</div>`;
+                    });
+                    html += '</div>';
+
+                    html += `<div class="text-blue-400 font-bold mb-2">AI Incident Response: <b>${statusData.status.toUpperCase()}</b></div>`;
+                    html += `<div class="text-xs text-gray-400 mt-2 space-y-1">`;
+                    statusData.trace.forEach(t => {
+                        html += `<div>${t}</div>`;
+                    });
+                    html += `</div>`;
+                    
+                    if (statusData.proposed_action) {
+                        html += `
+                            <div class="mt-4 pt-4 border-t border-gray-800">
+                                <div class="text-green-400 font-bold text-base">Proposed Fix Generated: ${statusData.proposed_action}</div>
+                                <div class="text-purple-400 font-bold">AI Diagnosis Confidence: ${(statusData.confidence_score * 100).toFixed(1)}%</div>
+                            </div>
+                        `;
+                    }
+                    document.getElementById('ai-status-display').innerHTML = html;
+                } else {
+                    document.getElementById('ai-status-display').innerHTML = `
+                        <div class="flex flex-col md:flex-row gap-2 mb-4">
+                            <div class="flex-1 border-2 bg-gray-900 border-gray-800 text-gray-600 p-2 rounded text-center text-xs font-bold">Autonomous Bug Detection</div>
+                            <div class="flex-1 border-2 bg-gray-900 border-gray-800 text-gray-600 p-2 rounded text-center text-xs font-bold">Intelligent Fix Suggestion</div>
+                            <div class="flex-1 border-2 bg-gray-900 border-gray-800 text-gray-600 p-2 rounded text-center text-xs font-bold">Sandbox Testing</div>
+                            <div class="flex-1 border-2 bg-gray-900 border-gray-800 text-gray-600 p-2 rounded text-center text-xs font-bold">Self Healing Deployment</div>
+                        </div>
+                        <div class="text-green-500 font-bold">System Healthy - AI Observing Passive</div>
+                    `;
+                }
+            } catch (e) {
+                // If API gateway is offline
+            }
+        }
+
+        // Polling
+        setInterval(fetchTasks, 2000);
+        setInterval(fetchMetrics, 3000);
+        setInterval(pollAI, 3000);
+        
+        fetchTasks();
+        pollAI();
+    </script>
+</body>
+</html>

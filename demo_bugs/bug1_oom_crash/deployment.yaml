@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: billing-api-oom
+  namespace: demo-apps
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: billing-api-oom
+  template:
+    metadata:
+      labels:
+        app: billing-api-oom
+    spec:
+      containers:
+      - name: billing-api
+        image: python:3.11-slim
+        command: ["python", "-c", "import time; l=[]; \nwhile True:\n  l.append(' ' * 10**7); time.sleep(0.1)"]
+        resources:
+          limits:
+            memory: "50Mi" # Will crash almost immediately
+            cpu: "100m"
