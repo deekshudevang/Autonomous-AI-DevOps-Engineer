@@ -4,81 +4,188 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Task Manager - AutoHeal Demo</title>
+    <!-- Modern Typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Space+Grotesk:wght@400;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <style>
-        body { background-color: #0f1115; color: #f8fafc; font-family: 'Inter', sans-serif; }
-        .card { background-color: #181a20; border: 1px solid #222630; border-radius: 8px; padding: 20px; }
+        /* Ultra Premium Aesthetic (Linear/Vercel Style) */
+        body { 
+            background-color: #000000;
+            background-image: 
+                radial-gradient(ellipse at 50% -20%, rgba(120, 119, 198, 0.15), transparent 50%),
+                radial-gradient(ellipse at 80% 80%, rgba(59, 130, 246, 0.08), transparent 40%);
+            color: #EDEDED; 
+            font-family: 'Outfit', sans-serif; 
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Glassmorphism Premium Cards */
+        .card { 
+            background: rgba(10, 10, 10, 0.6);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid rgba(255, 255, 255, 0.08); 
+            border-radius: 12px; 
+            padding: 24px; 
+            box-shadow: 0 4px 24px -1px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+            transition: all 0.3s ease;
+        }
+        .card:hover { 
+            border-color: rgba(255, 255, 255, 0.15); 
+            box-shadow: 0 8px 32px -1px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+            transform: translateY(-2px);
+        }
+
+        /* Advanced Typography Accents */
+        h1, h2 { font-family: 'Space Grotesk', sans-serif; letter-spacing: -0.03em; }
+        .gradient-text {
+            background: linear-gradient(135deg, #fff 0%, #a5a5a5 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        /* Interactive Elements */
+        button {
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            border-radius: 8px;
+        }
+        button:active { transform: scale(0.96); }
+
+        input {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: #fff;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
+        }
+        input:focus {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(99, 102, 241, 0.5);
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.2), 0 0 0 2px rgba(99, 102, 241, 0.2);
+            outline: none;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.3); }
     </style>
 </head>
-<body class="p-8">
+<body class="p-6 relative h-screen w-screen overflow-hidden flex flex-col">
+    <!-- Premium background grid overlay -->
+    <div class="absolute inset-0 z-[-1] opacity-[0.03]" style="background-image: linear-gradient(#fff 1px, transparent 1px), linear-gradient(90deg, #fff 1px, transparent 1px); background-size: 30px 30px;"></div>
 
-    <div class="max-w-6xl mx-auto">
-        <header class="mb-8 border-b border-gray-800 pb-4">
-            <h1 class="text-3xl font-bold text-blue-400">Task Management Dashboard</h1>
-            <p class="text-gray-400 text-sm mt-2">This demo software intentionally generates real-world production errors so our AI DevOps system can detect, analyze, and fix them automatically.</p>
+    <div class="max-w-[1400px] w-full mx-auto flex-1 flex flex-col min-h-0">
+        <header class="mb-6 flex justify-between items-end border-b border-white/10 pb-4 relative shrink-0">
+            <div>
+                <h1 class="text-4xl font-bold gradient-text tracking-tight mb-1">
+                    AutoHeal / ASHIP Dashboard
+                </h1>
+                <p class="text-gray-400 text-sm max-w-2xl font-light">Real-time autonomous telemetry & mitigation platform.</p>
+            </div>
+            <div class="flex items-center gap-2">
+                <span class="relative flex h-3 w-3">
+                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                  <span class="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+                </span>
+                <span class="text-xs font-mono text-emerald-500 uppercase tracking-widest font-semibold">Live System Active</span>
+            </div>
         </header>
 
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-            <div class="card text-center">
-                <h3 class="text-gray-400 text-sm">Server Health</h3>
-                <p id="health-metric" class="text-2xl font-bold text-green-400 mt-2">Healthy</p>
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-4 mb-6 shrink-0">
+            <div class="card flex flex-col justify-center">
+                <h3 class="text-gray-500 text-[10px] uppercase tracking-[0.2em] font-bold mb-1">System Status</h3>
+                <p id="health-metric" class="text-3xl font-bold text-gray-100 tracking-tight">Healthy</p>
+                <div class="h-1 w-full bg-white/5 rounded-full mt-3 overflow-hidden"><div class="h-full bg-emerald-500 w-full shadow-[0_0_10px_rgba(16,185,129,0.8)]"></div></div>
             </div>
-            <div class="card text-center">
-                <h3 class="text-gray-400 text-sm">API Status</h3>
-                <p id="api-status" class="text-2xl font-bold text-blue-400 mt-2">Online</p>
+            <div class="card flex flex-col justify-center">
+                <h3 class="text-gray-500 text-[10px] uppercase tracking-[0.2em] font-bold mb-1">API Latency</h3>
+                <p id="api-status" class="text-3xl font-bold text-blue-400 tracking-tight">Online</p>
+                <div class="h-1 w-full bg-white/5 rounded-full mt-3 overflow-hidden"><div class="h-full bg-blue-500 w-full shadow-[0_0_10px_rgba(59,130,246,0.8)]"></div></div>
             </div>
-            <div class="card text-center">
-                <h3 class="text-gray-400 text-sm">Error Count</h3>
-                <p id="error-count" class="text-2xl font-bold text-red-400 mt-2">0</p>
+            <div class="card flex flex-col justify-center relative overflow-hidden group">
+                <div class="absolute inset-0 bg-red-500/5 group-hover:bg-red-500/10 transition-colors pointer-events-none"></div>
+                <h3 class="text-gray-500 text-[10px] uppercase tracking-[0.2em] font-bold mb-1 relative z-10">Detected Anomalies</h3>
+                <p id="error-count" class="text-3xl font-bold text-red-400 tracking-tight relative z-10 transition-all">0</p>
             </div>
-            <div class="card text-center">
-                <h3 class="text-gray-400 text-sm">CPU / Memory Usage</h3>
-                <p id="metrics-data" class="text-lg font-bold text-yellow-500 mt-2">--% / --%</p>
+            <div class="card flex flex-col justify-center">
+                <h3 class="text-gray-500 text-[10px] uppercase tracking-[0.2em] font-bold mb-1">Resource Load</h3>
+                <p id="metrics-data" class="text-2xl font-mono text-indigo-300 font-bold tracking-tight">0.0% / 0.0%</p>
             </div>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 flex-1 min-h-0 pb-4">
             
             <!-- Tasks Area -->
-            <div class="md:col-span-2 card">
-                <h2 class="text-xl font-bold mb-4">Task List</h2>
+            <div class="lg:col-span-3 card flex flex-col h-full bg-black/40 relative group">
+                <div class="absolute inset-0 bg-blue-500/5 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none rounded-xl"></div>
+                <h2 class="text-sm font-semibold text-gray-200 mb-4 flex items-center gap-2 shrink-0">
+                    <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path></svg>
+                    Task Queue Simulator
+                </h2>
                 
-                <div class="flex gap-2 mb-4">
-                    <input type="text" id="task-title" class="flex-1 bg-gray-800 border-none rounded px-4 py-2 text-white" placeholder="Enter new task...">
-                    <button onclick="createTask()" class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded font-bold">Add</button>
+                <div class="flex flex-col gap-2 mb-4 relative shrink-0">
+                    <input type="text" id="task-title" class="w-full px-4 py-2 text-sm rounded-lg" placeholder="Enter test payload...">
+                    <button onclick="createTask()" class="w-full bg-white text-black hover:bg-gray-200 font-semibold px-4 py-2 text-sm">Submit Payload</button>
                 </div>
                 
-                <ul id="task-list" class="space-y-2">
+                <ul id="task-list" class="space-y-2 flex-1 overflow-y-auto pr-2 custom-scrollbar text-sm min-h-0">
                     <!-- Tasks injected here -->
                 </ul>
             </div>
 
             <!-- Fault Injection Area -->
-            <div class="card border-red-900 border-2">
-                <h2 class="text-xl font-bold text-red-500 mb-4">Test Bug Generation</h2>
-                <div class="space-y-3">
-                    <button onclick="triggerCrash()" class="w-full bg-red-900 hover:bg-red-800 text-white rounded py-2">Trigger App Crash</button>
-                    <button onclick="triggerSlow()" class="w-full bg-yellow-700 hover:bg-yellow-600 text-white rounded py-2">Trigger Slow API (Timeout)</button>
-                    <button onclick="triggerMemoryLeak()" class="w-full bg-purple-900 hover:bg-purple-800 text-white rounded py-2">Trigger Memory Leak</button>
-                    <button onclick="triggerLogicError()" class="w-full bg-orange-800 hover:bg-orange-700 text-white rounded py-2">Trigger Logic Error (Stats)</button>
+            <div class="lg:col-span-3 card flex flex-col h-full relative overflow-hidden group">
+                <div class="absolute top-0 right-0 w-32 h-32 bg-red-500/10 rounded-full blur-[50px] pointer-events-none group-hover:bg-red-500/20 transition-colors"></div>
+                
+                <h2 class="text-sm font-semibold text-gray-200 mb-4 flex items-center gap-2 shrink-0">
+                    <svg class="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                    Fault Injector
+                </h2>
+                
+                <div class="space-y-2 shrink-0">
+                    <button onclick="triggerCrash()" class="w-full bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 py-2.5 text-xs font-semibold uppercase tracking-wider">Simulate SIGKILL</button>
+                    <button onclick="triggerSlow()" class="w-full bg-yellow-500/10 hover:bg-yellow-500/20 text-yellow-400 border border-yellow-500/20 py-2.5 text-xs font-semibold uppercase tracking-wider">Artifical Latency</button>
+                    <button onclick="triggerMemoryLeak()" class="w-full bg-purple-500/10 hover:bg-purple-500/20 text-purple-400 border border-purple-500/20 py-2.5 text-xs font-semibold uppercase tracking-wider">Memory Exhaustion</button>
+                    <button onclick="triggerLogicError()" class="w-full bg-orange-500/10 hover:bg-orange-500/20 text-orange-400 border border-orange-500/20 py-2.5 text-xs font-semibold uppercase tracking-wider">State Corruption</button>
                 </div>
                 
-                <div class="mt-6 pt-6 border-t border-gray-800">
-                    <h3 class="text-sm font-bold mb-2 text-gray-400">Live API Response Feed</h3>
-                    <pre id="api-feed" class="text-xs text-red-300 h-32 overflow-y-auto bg-black p-2 rounded">Waiting...</pre>
+                <div class="mt-4 pt-4 border-t border-white/10 flex-1 flex flex-col min-h-0">
+                    <h3 class="text-[10px] font-bold mb-2 text-gray-500 uppercase tracking-widest shrink-0">
+                        Live Event Stream
+                    </h3>
+                    <pre id="api-feed" class="text-[11px] leading-relaxed text-gray-400 flex-1 overflow-y-auto bg-black/60 border border-white/5 p-3 rounded-lg font-mono custom-scrollbar min-h-0 m-0 shadow-inner">Awaiting stream data...</pre>
                 </div>
             </div>
             <!-- AutoHeal AI Area -->
-            <div class="card border-blue-900 border-2 mt-8 md:col-span-3 lg:col-span-3">
-                <div class="flex justify-between items-center mb-4">
-                    <h2 class="text-xl font-bold text-blue-500">AutoHeal AI Agent (Live)</h2>
-                    <div class="space-x-2">
-                        <button onclick="haltAI()" class="bg-red-600 hover:bg-red-500 text-white rounded px-3 py-1 text-sm font-bold">Stop AI Ops</button>
-                        <button onclick="resumeAI()" class="bg-green-600 hover:bg-green-500 text-white rounded px-3 py-1 text-sm font-bold">Resume AI</button>
+            <div class="lg:col-span-6 card bg-black/60 relative overflow-hidden h-full flex flex-col group border border-indigo-500/20">
+                <!-- Inner subtle pulse -->
+                <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-indigo-500/5 rounded-full blur-[100px] pointer-events-none group-hover:bg-indigo-500/10 transition-colors duration-1000"></div>
+
+                <div class="flex justify-between items-center mb-6 relative z-10 shrink-0 border-b border-white/10 pb-4">
+                    <h2 class="text-lg font-bold text-white flex items-center gap-3">
+                        <span class="relative flex h-3 w-3">
+                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
+                            <span class="relative inline-flex rounded-full h-3 w-3 bg-indigo-500"></span>
+                        </span>
+                        AutoHeal AI Core
+                    </h2>
+                    <div class="flex space-x-2">
+                        <button onclick="haltAI()" class="bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 text-red-400 px-3 py-1.5 text-xs font-bold rounded">Emergency Stop</button>
+                        <button onclick="resumeAI()" class="bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/30 text-indigo-400 px-3 py-1.5 text-xs font-bold rounded">Enable Agent</button>
                     </div>
                 </div>
-                <div id="ai-status-display" class="bg-black p-4 rounded min-h-[100px] text-sm font-mono overflow-y-auto max-h-64">
-                    <div class="text-green-500 font-bold">System Healthy - AI Observing Passive</div>
+                <!-- Terminal Display Area -->
+                <div id="ai-status-display" class="bg-[#050505] border border-white/5 p-5 rounded-lg flex-1 text-sm font-mono overflow-y-auto shadow-inner relative z-10 custom-scrollbar min-h-0">
+                    <div class="text-emerald-400 font-semibold flex items-center gap-2">
+                        System Core: Nominal — AI Agent in passive observation mode.
+                    </div>
                 </div>
             </div>
         </div>
@@ -112,10 +219,14 @@
 
         async function fetchMetrics() {
             try {
-                const res = await fetch('/metrics');
+                const res = await fetch('http://localhost:5000/metrics');
                 if(!res.ok) throw new Error("Metrics Endpoint Failed");
                 const data = await res.json();
                 document.getElementById('metrics-data').innerText = `${data.cpu_usage_percent}% / ${data.memory_usage_percent}%`;
+                if(data.system_errors !== undefined) {
+                    errCount = data.system_errors;
+                    document.getElementById('error-count').innerText = errCount;
+                }
             } catch (e) {
                 document.getElementById('metrics-data').innerText = "Offline";
                 document.getElementById('health-metric').innerText = "Unresponsive";
@@ -125,7 +236,7 @@
 
         async function fetchTasks() {
             try {
-                const res = await fetch('/tasks');
+                const res = await fetch('http://localhost:5000/tasks');
                 if(!res.ok) throw new Error("Database Connection Error");
                 const tasks = await res.json();
                 
@@ -144,8 +255,6 @@
                 document.getElementById('api-status').innerText = "Online";
                 document.getElementById('api-status').className = "text-2xl font-bold text-blue-400 mt-2";
             } catch (e) {
-                errCount++;
-                document.getElementById('error-count').innerText = errCount;
                 logFeed("ERROR: " + e.message);
                 document.getElementById('api-status').innerText = "DB Failure";
                 document.getElementById('api-status').className = "text-2xl font-bold text-red-400 mt-2";
@@ -157,7 +266,7 @@
             if(!title) return;
             try {
                 // Warning: The Python backend has an intentional memory leak here!
-                const res = await fetch('/tasks', {
+                const res = await fetch('http://localhost:5000/tasks', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({title})
@@ -175,9 +284,7 @@
         // --- Bug Triggers ---
         async function triggerCrash() {
             logFeed("Triggering Fatal Crash...");
-            try { await fetch('/api/crash'); } catch(e) {}
-            errCount++;
-            document.getElementById('error-count').innerText = errCount;
+            try { await fetch('http://localhost:5000/api/crash'); } catch(e) {}
         }
 
         async function triggerSlow() {
@@ -185,7 +292,7 @@
             document.getElementById('api-status').innerText = "Latency Spiking...";
             document.getElementById('api-status').className = "text-2xl font-bold text-yellow-500 mt-2";
             try { 
-                const res = await fetch('/api/slow'); 
+                const res = await fetch('http://localhost:5000/api/slow'); 
                 const data = await res.json();
                 logFeed("Slow Response received: " + data.message);
             } catch(e) {}
@@ -194,20 +301,18 @@
         async function triggerMemoryLeak() {
             logFeed("Flooding memory heap...");
             for(let i=0; i<50; i++) {
-                fetch('/tasks', {method: 'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({title:"Leak-" + i})});
+                fetch('http://localhost:5000/tasks', {method: 'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({title:"Leak-" + i})});
             }
         }
 
         async function triggerLogicError() {
             logFeed("Fetching system stats...");
             try {
-                const res = await fetch('/api/stats');
+                const res = await fetch('http://localhost:5000/api/stats');
                 const data = await res.json();
                 logFeed(`Stats: Total=${data.total}, Completed=${data.completed}, Percentage=${data.percentage}%`);
                 if(data.percentage > 100 || data.percentage < 0) {
                     logFeed("🔥 Logic Error Detected: Invalid percentage value.");
-                    errCount++;
-                    document.getElementById('error-count').innerText = errCount;
                 }
             } catch(e) {}
         }
@@ -228,41 +333,60 @@
                         { label: 'Sandbox Testing', activePaths: ['sandboxing', 'resolved'] },
                         { label: 'Self Healing Deployment', activePaths: ['resolved'] }
                     ];
+                    
+                    if (pStatus === 'resolved') {
+                        errCount = 0;
+                        document.getElementById('error-count').innerText = errCount;
+                        document.getElementById('api-status').innerText = "All Systems Nominal";
+                        document.getElementById('api-status').className = "text-2xl font-bold text-emerald-400 mt-2 tracking-tight";
+                        // Tell Backend to clear global SYSTEM_ERRORS tracker
+                        fetch('http://localhost:5000/api/reset_errors', { method: 'POST' }).catch(x => {});
+                    }
 
-                    let html = '<div class="flex flex-col md:flex-row gap-2 mb-4">';
+                    let html = '<div class="flex flex-col md:flex-row gap-2 mb-6 relative">';
                     steps.forEach(s => {
                         let isActive = s.activePaths.includes(pStatus);
-                        let colorClass = isActive ? (pStatus==='resolved' ? 'bg-green-700 text-white border-green-500 shadow-[0_0_10px_rgba(34,197,94,0.5)]' : 'bg-blue-800 text-white border-blue-500 animate-pulse outline outline-2 outline-blue-400') : 'bg-gray-900 border-gray-800 text-gray-500';
-                        if (pStatus === 'halted') colorClass = 'bg-red-900 border-red-700 text-gray-300';
-                        html += `<div class="flex-1 border-2 ${colorClass} p-2 rounded text-center text-xs font-bold transition-all duration-300">${s.label}</div>`;
+                        let colorClass = isActive 
+                            ? (pStatus==='resolved' 
+                                ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30' 
+                                : 'bg-indigo-500/10 text-indigo-300 border-indigo-500/40 animate-pulse') 
+                            : 'bg-white/5 border-white/5 text-gray-600';
+                        if (pStatus === 'halted') colorClass = 'bg-red-500/10 border-red-500/30 text-red-400';
+                        html += `<div class="flex-1 border ${colorClass} p-3 rounded-lg text-center text-[11px] uppercase tracking-widest font-bold transition-all duration-300">${s.label}</div>`;
                     });
                     html += '</div>';
 
-                    html += `<div class="text-blue-400 font-bold mb-2">AI Incident Response: <b>${statusData.status.toUpperCase()}</b></div>`;
-                    html += `<div class="text-xs text-gray-400 mt-2 space-y-1">`;
+                    html += `<div class="text-indigo-400 font-bold mb-4 flex items-center gap-2"><span class="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-ping"></span> AI Status: <span class="bg-indigo-500/20 px-2 py-1 rounded text-white text-xs">${statusData.status.toUpperCase()}</span></div>`;
+                    html += `<div class="text-[12px] text-gray-400 mt-3 space-y-2 pl-4 border-l-2 border-white/10">`;
                     statusData.trace.forEach(t => {
-                        html += `<div>${t}</div>`;
+                        html += `<div class="font-mono text-gray-500 hover:text-gray-200 transition-colors">==> ${t}</div>`;
                     });
                     html += `</div>`;
                     
                     if (statusData.proposed_action) {
                         html += `
-                            <div class="mt-4 pt-4 border-t border-gray-800">
-                                <div class="text-green-400 font-bold text-base">Proposed Fix Generated: ${statusData.proposed_action}</div>
-                                <div class="text-purple-400 font-bold">AI Diagnosis Confidence: ${(statusData.confidence_score * 100).toFixed(1)}%</div>
+                            <div class="mt-6 pt-5 border-t border-white/10 relative">
+                                <div class="text-emerald-400 font-bold text-sm flex items-center gap-2">
+                                    <span class="w-2 h-2 rounded bg-emerald-500"></span> Generated Patch Target: <span class="text-white">${statusData.proposed_action}</span>
+                                </div>
+                                <div class="text-gray-400 font-mono text-xs mt-2 pl-4">
+                                    Confidence Matrix: <span class="text-indigo-300 ml-2 font-bold">${(statusData.confidence_score * 100).toFixed(1)}%</span>
+                                </div>
                             </div>
                         `;
                     }
                     document.getElementById('ai-status-display').innerHTML = html;
                 } else {
                     document.getElementById('ai-status-display').innerHTML = `
-                        <div class="flex flex-col md:flex-row gap-2 mb-4">
-                            <div class="flex-1 border-2 bg-gray-900 border-gray-800 text-gray-600 p-2 rounded text-center text-xs font-bold">Autonomous Bug Detection</div>
-                            <div class="flex-1 border-2 bg-gray-900 border-gray-800 text-gray-600 p-2 rounded text-center text-xs font-bold">Intelligent Fix Suggestion</div>
-                            <div class="flex-1 border-2 bg-gray-900 border-gray-800 text-gray-600 p-2 rounded text-center text-xs font-bold">Sandbox Testing</div>
-                            <div class="flex-1 border-2 bg-gray-900 border-gray-800 text-gray-600 p-2 rounded text-center text-xs font-bold">Self Healing Deployment</div>
+                        <div class="flex flex-col md:flex-row gap-2 mb-6 relative">
+                            <div class="flex-1 border bg-white/5 border-white/5 text-gray-600 p-3 rounded-lg text-center text-[11px] uppercase tracking-widest font-bold">Bug Detection</div>
+                            <div class="flex-1 border bg-white/5 border-white/5 text-gray-600 p-3 rounded-lg text-center text-[11px] uppercase tracking-widest font-bold">Fix Suggestion</div>
+                            <div class="flex-1 border bg-white/5 border-white/5 text-gray-600 p-3 rounded-lg text-center text-[11px] uppercase tracking-widest font-bold">Sandbox Test</div>
+                            <div class="flex-1 border bg-white/5 border-white/5 text-gray-600 p-3 rounded-lg text-center text-[11px] uppercase tracking-widest font-bold">Deployment</div>
                         </div>
-                        <div class="text-green-500 font-bold">System Healthy - AI Observing Passive</div>
+                        <div class="text-emerald-400 font-semibold flex items-center gap-2">
+                            System Core: Nominal — AI Agent in passive observation mode.
+                        </div>
                     `;
                 }
             } catch (e) {

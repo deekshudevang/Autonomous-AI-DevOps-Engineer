@@ -2,6 +2,10 @@ import logging
 import os
 import random
 import time
+import logging
+import os
+import random
+import time
 
 import mongomock
 import psutil
@@ -11,12 +15,22 @@ from flask import Flask, jsonify, render_template, request
 app = Flask(__name__)
 # Global AutoHeal State
 AUTO_HEALED = False
+SYSTEM_ERRORS = 0  # Global error counter — persists across page refreshes
+DB_FAULT_ACTIVE = False  # Only True when Desktop App explicitly injects DB fault
 
+
+@app.after_request
+def after_request(response):
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
+    response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
+    return response
 
 @app.route("/api/autoheal", methods=["POST"])
 def apply_autoheal():
-    global AUTO_HEALED
+    global AUTO_HEALED, DB_FAULT_ACTIVE
     AUTO_HEALED = True
+    DB_FAULT_ACTIVE = False
     return jsonify({"status": "healed"})
 
 
@@ -66,11 +80,21 @@ memory_leak_store = []
 
 
 def get_db_connection():
-    # Bug 4 Fix: Database Connection Failure (30% chance)
-    if not AUTO_HEALED and random.random() < 0.3:
+    # Only fail when Desktop App explicitly injects a DB fault
+    global SYSTEM_ERRORS
+    if DB_FAULT_ACTIVE and not AUTO_HEALED:
+        SYSTEM_ERRORS += 1
         logger.error("Database connection timeout")
         raise Exception("Database connection timeout")
     return tasks_col
+
+
+@app.route("/api/inject_db_fault", methods=["POST"])
+def inject_db_fault():
+    global DB_FAULT_ACTIVE, AUTO_HEALED
+    DB_FAULT_ACTIVE = True
+    AUTO_HEALED = False
+    return jsonify({"status": "db_fault_active"})
 
 
 @app.route("/")
@@ -153,7 +177,9 @@ def slow_api():
     if AUTO_HEALED:
         return jsonify({"message": "Response after 0 ms. Telemetry green."})
 
+    global SYSTEM_ERRORS
     # Bug 1: Slow API Response
+    SYSTEM_ERRORS += 1
     logger.warning("Slow API endpoint invoked. Delaying response for 6 seconds...")
     time.sleep(6)
     return jsonify({"message": "Response after 6 seconds"})
@@ -167,6 +193,7 @@ def crash_api():
         )
 
     # Bug 2: Application Crash
+    global SYSTEM_ERRORS
     err_msg = "Fatal Server Crash: Memory overflow in handler"
     fake_traceback = f'Traceback (most recent call last):\n  File "/usr/local/lib/python3.11/site-packages/flask/app.py", line 1478, in __call__\n    return self.wsgi_app(environ, start_response)\nException: {err_msg}'
 
@@ -175,6 +202,7 @@ def crash_api():
             f"\n[ERROR] {time.strftime('%Y-%m-%d %H:%M:%S')}\nService: TaskService\nError: {fake_traceback}\n"
         )
 
+    SYSTEM_ERRORS += 1
     logger.error(err_msg)
     raise Exception(err_msg)
 
@@ -188,8 +216,11 @@ def incorrectly_calculated_stats():
         completed = col.count_documents({"status": "completed"})
 
         # LOGIC BUG: Division by random wrong number or simple mistake
+        global SYSTEM_ERRORS
         if not AUTO_HEALED:
             percentage = (completed + 1) / (total - 1) * 100 if total > 1 else 100
+            if percentage > 100 or percentage < 0:
+                SYSTEM_ERRORS += 1
         else:
             percentage = (completed / total * 100) if total > 0 else 100.0
 
@@ -203,6 +234,7 @@ def incorrectly_calculated_stats():
 @app.route("/metrics", methods=["GET"])
 def get_metrics():
     # Generate system metrics
+    global SYSTEM_ERRORS
     cpu = psutil.cpu_percent(interval=0.1)
     mem_info = psutil.virtual_memory()
     return jsonify(
@@ -211,8 +243,17 @@ def get_metrics():
             "memory_usage_percent": mem_info.percent,
             "api_response_time_ms": random.randint(10, 500),  # Mock
             "request_count": len(memory_leak_store) * 10 + random.randint(1, 100),
+            "system_errors": SYSTEM_ERRORS
         }
     )
+
+@app.route("/api/reset_errors", methods=["POST"])
+def reset_errors():
+    global SYSTEM_ERRORS, DB_FAULT_ACTIVE, AUTO_HEALED
+    SYSTEM_ERRORS = 0
+    DB_FAULT_ACTIVE = False
+    AUTO_HEALED = True  # Healed state — suppress all bugs
+    return jsonify({"status": "cleared", "system_errors": 0})
 
 
 if __name__ == "__main__":

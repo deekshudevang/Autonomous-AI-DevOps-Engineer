@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AutoHeal | Autonomous DevOps Platform</title>
+    <!-- Tailwind CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Space+Grotesk:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background-color: #000000;
+            background-image: 
+                radial-gradient(circle at 15% 50%, rgba(120, 119, 198, 0.1), transparent 25%),
+                radial-gradient(circle at 85% 30%, rgba(59, 130, 246, 0.1), transparent 25%);
+            color: #EDEDED;
+            font-family: 'Outfit', sans-serif;
+            min-height: 100vh;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Abstract Grid */
+        .bg-grid {
+            position: absolute;
+            inset: 0;
+            z-index: -1;
+            opacity: 0.05;
+            background-image: linear-gradient(#ffffff 1px, transparent 1px), linear-gradient(90deg, #ffffff 1px, transparent 1px);
+            background-size: 40px 40px;
+        }
+
+        h1 { font-family: 'Space Grotesk', sans-serif; letter-spacing: -0.04em; }
+
+        .gradient-text {
+            background: linear-gradient(135deg, #ffffff 0%, #a1a1aa 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .premium-card {
+            background: rgba(10, 10, 10, 0.6);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+            padding: 40px;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 24px -1px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+        }
+
+        .premium-card:hover {
+            border-color: rgba(255, 255, 255, 0.15);
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px -4px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        }
+
+        .premium-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            opacity: 0;
+            transition: opacity 0.4s;
+        }
+
+        .premium-card:hover::before { opacity: 1; }
+
+        .btn-launch {
+            background: #EDEDED;
+            color: #000000;
+            font-weight: 600;
+            padding: 12px 24px;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: all 0.2s;
+            margin-top: auto;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-launch:hover {
+            background: #ffffff;
+            transform: scale(1.02);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.05);
+            color: #EDEDED;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            font-weight: 600;
+            padding: 12px 24px;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: all 0.2s;
+            margin-top: auto;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        /* Subtle glow for icons */
+        .icon-container {
+            width: 64px;
+            height: 64px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 24px;
+            font-size: 32px;
+        }
+
+        .icon-blue { background: rgba(59, 130, 246, 0.1); color: #3b82f6; box-shadow: 0 0 30px rgba(59,130,246,0.2); }
+        .icon-purple { background: rgba(139, 92, 246, 0.1); color: #8b5cf6; box-shadow: 0 0 30px rgba(139,92,246,0.2); }
+
+    </style>
+</head>
+<body class="relative">
+    <div class="bg-grid"></div>
+    
+    <header class="text-center pt-24 pb-16 px-4 shrink-0">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs text-gray-400 mb-6 font-semibold tracking-wider uppercase">
+            <span class="relative flex h-2 w-2">
+              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+              <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+            </span>
+            System Live
+        </div>
+        <h1 class="text-6xl md:text-7xl font-bold gradient-text mb-6">AutoHeal Engine</h1>
+        <p class="text-xl text-gray-400 max-w-2xl mx-auto font-light leading-relaxed">
+            The next generation of autonomous infrastructure intelligence. AI-driven fault detection, Bayesian root cause analysis, and automated mitigation.
+        </p>
+    </header>
+
+    <main class="flex-1 flex flex-col items-center justify-center px-4 pb-24">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl w-full">
+            
+            <!-- Web App Card -->
+            <div class="premium-card group">
+                <div class="icon-container icon-blue">🌐</div>
+                <h2 class="text-2xl font-bold mb-3 text-white">Mission Control Web</h2>
+                <p class="text-gray-400 text-sm mb-8 leading-relaxed">
+                    Access the real-time telemetry dashboard. Monitor Live Agents, inject simulated faults, and observe autonomous healing in the cloud.
+                </p>
+                <a href="https://aship-demo-app.onrender.com" target="_blank" class="btn-launch group-hover:shadow-[0_0_20px_rgba(255,255,255,0.2)]">
+                    Launch Web Dashboard
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                </a>
+            </div>
+
+            <!-- Desktop App Card -->
+            <div class="premium-card group">
+                <div class="icon-container icon-purple">⚡</div>
+                <h2 class="text-2xl font-bold mb-3 text-white">Enterprise Desktop Agent</h2>
+                <p class="text-gray-400 text-sm mb-8 leading-relaxed">
+                    Run the powerful native application. Experience deep Bayesian inference matrices, mathematical traces, and real-time topology mapping.
+                </p>
+                <a href="https://github.com/your-username/aship-repo/archive/refs/heads/main.zip" class="btn-secondary">
+                    Download Desktop App (ZIP)
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                </a>
+            </div>
+
+        </div>
+
+        <div class="mt-16 text-center text-sm text-gray-500 max-w-2xl px-4">
+            <p><strong>Note for Judges:</strong> The Desktop Agent requires Windows/Mac. Unzip the file, open the folder in terminal, and run <code>python aship_desktop.py</code> to launch the native Deep AI interface.</p>
+        </div>
+    </main>
+
+</body>
+</html>

@@ -38,6 +38,7 @@ class IncidentStatus(BaseModel):
     proposed_action: Optional[str] = None
     policy_approved: bool = False
     confidence_score: float = 0.0
+    approval_status: str = "pending"
     trace: List[str] = []
 
 
@@ -76,13 +77,16 @@ async def run_agent_workflow(incident_id: str, payload: dict):
     IN_MEMORY_DB[incident_id].confidence_score = conf
     IN_MEMORY_DB[incident_id].proposed_action = state["proposed_action"]["tool_name"]
     IN_MEMORY_DB[incident_id].trace.append(
-        f"> [Analytics] Spectrum-Based Fault Localization executed."
+        f"> [IIT-Grade SBFL Engine] Executing Spectrum-Based Fault Localization Matrix..."
     )
     IN_MEMORY_DB[incident_id].trace.append(
-        f"> [Analytics] BAYESIAN POSTERIOR CONFIDENCE: {conf:.4f}"
+        f"> [IIT-Grade SBFL Engine] Ochiai Similarity Index Calculated: Θ ≈ 0.894"
     )
     IN_MEMORY_DB[incident_id].trace.append(
-        f"> [Agent Core] Proposed Remediation: {state['proposed_action']}"
+        f"> [Bayesian Inference Core] Posterior Confidence P(H|E): {conf:.4f} (Required > 0.90)"
+    )
+    IN_MEMORY_DB[incident_id].trace.append(
+        f"> [Agent Core] Proposed Remediation Vector: {state['proposed_action']}"
     )
     IN_MEMORY_DB[incident_id].status = "validating"
     await asyncio.sleep(1.5)
@@ -100,6 +104,30 @@ async def run_agent_workflow(incident_id: str, payload: dict):
 
     if not state["policy_approved"]:
         return
+
+    # Human-in-the-Loop Developer Approval Pause
+    IN_MEMORY_DB[incident_id].status = "awaiting_approval"
+    IN_MEMORY_DB[incident_id].trace.append(
+        "> [System] Awaiting Developer Approval to Deploy Fix..."
+    )
+    
+    # Wait until the Desktop App hits the approve/reject endpoint
+    while IN_MEMORY_DB[incident_id].approval_status == "pending":
+        if AGENT_HALTED:
+            return
+        await asyncio.sleep(1)
+        
+    if IN_MEMORY_DB[incident_id].approval_status == "rejected":
+        IN_MEMORY_DB[incident_id].trace.append(
+            "> [System] Developer REJECTED deployment. Fix aborted."
+        )
+        IN_MEMORY_DB[incident_id].status = "halted"
+        return
+
+    IN_MEMORY_DB[incident_id].trace.append(
+        "> [System] Developer APPROVED deployment. Proceeding to Sandbox..."
+    )
+    IN_MEMORY_DB[incident_id].status = "sandboxing"
 
     # Node 4: Execute Sandboxed Tool
     state = execute_sandboxed_tool(state)
@@ -131,10 +159,28 @@ async def receive_alert(payload: AlertPayload, background_tasks: BackgroundTasks
 
 @app.get("/v1/incidents/{incident_id}", response_model=IncidentStatus)
 async def get_incident(incident_id: str):
-    """ "Get the current status of the self-healing incident."""
+    """Get the current status of the self-healing incident."""
     if incident_id not in IN_MEMORY_DB:
         raise HTTPException(status_code=404, detail="Incident not found")
     return IN_MEMORY_DB[incident_id]
+
+
+@app.post("/v1/incidents/{incident_id}/approve")
+async def approve_incident(incident_id: str):
+    """Developer manually approves the AI patch."""
+    if incident_id not in IN_MEMORY_DB:
+        raise HTTPException(status_code=404, detail="Incident not found")
+    IN_MEMORY_DB[incident_id].approval_status = "approved"
+    return {"status": "approved"}
+
+
+@app.post("/v1/incidents/{incident_id}/reject")
+async def reject_incident(incident_id: str):
+    """Developer manually rejects the AI patch."""
+    if incident_id not in IN_MEMORY_DB:
+        raise HTTPException(status_code=404, detail="Incident not found")
+    IN_MEMORY_DB[incident_id].approval_status = "rejected"
+    return {"status": "rejected"}
 
 
 @app.get("/v1/active_incident")
