@@ -44,7 +44,7 @@ def handle_exception(e):
     logger.error(err_str)
 
     # Also manual fallback just to be absolutely sure the Live Agent gets the data
-    with open("C:\\tmp\\aship_logs\\demo_app.log", "a") as f:
+    with open("/tmp/aship_logs_demo_app.log", "a") as f:
         f.write(
             f"\n[ERROR] {time.strftime('%Y-%m-%d %H:%M:%S')}\nService: TaskService\nError: {err_str}\n"
         )
@@ -59,8 +59,8 @@ class CustomFormatter(logging.Formatter):
         return f"[{record.levelname}] {time_str}\nService: TaskService\nError: {record.getMessage()}"
 
 
-os.makedirs("C:\\tmp\\aship_logs", exist_ok=True)
-fh = logging.FileHandler("C:\\tmp\\aship_logs\\demo_app.log")
+os.makedirs("/tmp/aship_logs_demo", exist_ok=True)
+fh = logging.FileHandler("/tmp/aship_logs_demo_app.log")
 fh.setFormatter(CustomFormatter(datefmt="%Y-%m-%d %H:%M:%S"))
 
 sh = logging.StreamHandler()
@@ -197,7 +197,7 @@ def crash_api():
     err_msg = "Fatal Server Crash: Memory overflow in handler"
     fake_traceback = f'Traceback (most recent call last):\n  File "/usr/local/lib/python3.11/site-packages/flask/app.py", line 1478, in __call__\n    return self.wsgi_app(environ, start_response)\nException: {err_msg}'
 
-    with open("C:\\tmp\\aship_logs\\demo_app.log", "a") as f:
+    with open("/tmp/aship_logs_demo_app.log", "a") as f:
         f.write(
             f"\n[ERROR] {time.strftime('%Y-%m-%d %H:%M:%S')}\nService: TaskService\nError: {fake_traceback}\n"
         )

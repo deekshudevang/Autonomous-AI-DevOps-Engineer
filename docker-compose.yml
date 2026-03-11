@@ -1,0 +1,71 @@
+version: '3.8'
+services:
+  # ---------------------------------------- #
+  # Core ASHIP Services                      #
+  # ---------------------------------------- #
+  api_gateway:
+    build:
+      context: .
+      dockerfile: api_gateway/Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - OPA_URL=http://opa:8181/v1/data/aship/safety
+    depends_on:
+      - opa
+    networks:
+      - aship_net
+
+  agent_core:
+    build:
+      context: .
+      dockerfile: agent_core/Dockerfile
+    environment:
+      - VECTOR_DB_URL=http://qdrant:6333
+      - KAFKA_BROKER=kafka:9092
+    depends_on:
+      - qdrant
+    networks:
+      - aship_net
+
+  # ---------------------------------------- #
+  # Third-Party Dependencies                 #
+  # ---------------------------------------- #
+  opa:
+    image: openpolicyagent/opa:latest
+    ports:
+      - "8181:8181"
+    command:
+      - "run"
+      - "--server"
+      - "--log-level=debug"
+    volumes:
+      - ./policy_engine/policies:/policies
+    networks:
+      - aship_net
+
+  qdrant:
+    image: qdrant/qdrant:latest
+    ports:
+      - "6333:6333"
+    networks:
+      - aship_net
+
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    ports:
+      - "16686:16686"
+      - "6831:6831/udp"
+    networks:
+      - aship_net
+
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - "9090:9090"
+    networks:
+      - aship_net
+
+networks:
+  aship_net:
+    driver: bridge
