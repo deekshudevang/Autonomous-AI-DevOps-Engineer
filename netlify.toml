@@ -1,9 +1,0 @@
-[build]
-  publish = "landing"
-
-[[redirects]]
-  # Route API traffic locally for dev if needed, or to Render in prod
-  from = "/api/*"
-  to = "https://aship-demo-app.onrender.com/api/:splat"
-  status = 200
-  force = true
